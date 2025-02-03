@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+
+        <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1, width=device-width">
+
+        <!-- http://getbootstrap.com/docs/5.1/ -->
+        <link href="/static/bootstrap.min.css" rel="stylesheet">
+        <script src="/static/bootstrap.bundle.min.js"></script>
+        <script src="/static/jquery.js"></script>
+        <script src="/static/jquery.min.js"></script>
+        <link href="/static/styles.css" rel="stylesheet">
+        <script>
+            function alertUser(msg) {
+            alert(msg);
+            }
+            </script>
+        <title>Request</title>
+
+    </head>
+
+    <body{% if session["type"] == 'managers' and reqnum > 0 %} onload="alertUser('Request number R{{ reqnum }} has been submitted successfully')"{% endif %}>
+        
+        <nav class="bg-light border navbar navbar-expand-md navbar-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">YOKO Systems</a>
+                <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbar" data-bs-toggle="collapse" type="button">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbar">
+                    {% if session["user_id"] %}
+                        <ul class="navbar-nav me-auto mt-2">
+                            {% if session["type"] == 'users' %}
+                            <li class="nav-item"><a class="nav-link" href="/myorders">My work orders</a></li>
+                            {% endif %}
+                        </ul>
+                        <ul class="navbar-nav ms-auto mt-2">
+                            <li class="nav-item"><p class="nav-link">{{ username_display }}</p></li>
+                            <li class="nav-item"><a class="nav-link" href="/logout">Log out</a></li>
+                        </ul>
+                    {% else %}
+                        <ul class="navbar-nav ms-auto mt-2">
+                            <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+
+        {% if get_flashed_messages() %}
+            <header>
+                <div class="alert alert-primary mb-0 text-center" role="alert">
+                    {{ get_flashed_messages() | join(" ") }}
+                </div>
+            </header>
+        {% endif %}
+
+        <main class="container-fluid py-5 text-center">
+            {% if session["type"] == 'managers' %}
+<table>
+    <tr>
+        <td>
+<div align="left" style="margin-left:5%">
+    <form action="/" method="post">
+    <label for="sort">Sort by:</label>
+    <select name="options" id="sort">
+      <option value="0" {% if default == 0 %} selected {% endif %}>Request number</option>
+      <option value="1" {% if default == 1 %} selected {% endif %}>Status</option>
+      <option value="2" {% if default == 2 %} selected {% endif %}>Priority</option>
+      <option value="5" {% if default == 5 %} selected {% endif %}>Due date</option>
+      <option value="6" {% if default == 6 %} selected {% endif %}>Equipment ID</option>
+    </select>
+    <button class="btn btn-primary" type="submit">Sort</button>
+    </form>
+</div>
+</td>
+<td>
+    <div align="right" style="margin-right:5%">
+        <form action="/" method="post">
+            <button class="btn btn-primary" type="submit" name="options" value="7">Create request</button>
+        </form>
+    </div>
+</td>
+</tr>
+</table>
+    <hr>
+<div>
+<table>
+    <thead>
+        <tr>
+            <th style="padding-bottom:5px;padding-top:5px;">Request number</th>
+            <th style="padding-bottom:5px;padding-top:5px;">Status</th>
+            <th style="padding-bottom:5px;padding-top:5px;">Priority</th>
+            <th style="padding-bottom:5px;padding-top:5px;">Maintenence engineer</th>
+            <th style="padding-bottom:5px;padding-top:5px;white-space: nowrap;">Due date</th>
+            <th style="padding-bottom:5px;padding-top:5px;">Equipment ID</th>
+            <th style="padding-bottom:5px;padding-top:5px;">Description</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <form action="/" method="post">
+        {% for a in data %}
+            <tr class="data">
+                <td style="padding-bottom:5px;padding-top:5px;">R{{ a[0] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;">{{ a[1] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;">{{ a[2] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;">{{ a[3] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;white-space: nowrap;">{{ a[5] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;">{{ a[6] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;">{{ a[7] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;">{% if a[1] == 'Pending' %}<button class="btn btn-primary" type="submit" name="delete" value="{{ 10 + a[0] }}">Delete request</button>{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </form>
+        {% if data|length == 0 %}
+        <tr class="data">
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td></td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+</div>
+{% else %}
+<table>
+    <tr>
+        <td>
+<div align="left" style="margin-left:5%">
+    <form action="/" method="post">
+    <label for="sort">Sort by:</label>
+    <select name="options" id="sort">
+      <option value="0" {% if default == 0 %} selected {% endif %}>Request number</option>
+      <option value="2" {% if default == 2 %} selected {% endif %}>Priority</option>
+      <option value="5" {% if default == 5 %} selected {% endif %}>Due date</option>
+      <option value="6" {% if default == 6 %} selected {% endif %}>Equipment ID</option>
+    </select>
+    <button class="btn btn-primary" type="submit">Sort</button>
+    </form>
+</div>
+</td>
+</tr>
+</table>
+    <hr>
+<div>
+    <form action="/" method="post">
+<table>
+    <thead>
+        <tr>
+            <th style="padding-bottom:5px;padding-top:5px;">Request number</th>
+            <th style="padding-bottom:5px;padding-top:5px;">Priority</th>
+            <th style="padding-bottom:5px;padding-top:5px;">Production engineer</th>
+            <th style="padding-bottom:5px;padding-top:5px;white-space: nowrap;">Due date</th>
+            <th style="padding-bottom:5px;padding-top:5px;">Equipment ID</th>
+            <th style="padding-bottom:5px;padding-top:5px;">Description</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <form action="/" method="post">
+        {% for a in data %}
+            <tr class="data">
+                <td style="padding-bottom:5px;padding-top:5px;">R{{ a[0] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;">{{ a[2] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;">{{ a[4] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;white-space: nowrap;">{{ a[5] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;">{{ a[6] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;">{{ a[7] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px; align-content: center;display: flex;flex-direction: row;justify-content: center;align-items: center;">
+                    <button class="btn btn-primary" style="margin-right:10px" type="submit" name="accept" value="I{{ 10 + a[0] }}">
+                        <img src="/static/check.png" style="height: 15px; width: 15px">
+                    </button>
+                    <button class="btn btn-primary" type="submit" name="accept" value="I{{ (10 + a[0]) * -1 }}">
+                        <img src="/static/close.png" style="height: 15px; width: 15px">
+                    </button>
+                </td>
+            </tr>
+        {% endfor %}
+        </form>
+        {% if data|length == 0 %}
+        <tr class="data">
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td></td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+</form>
+</div>
+{% endif %}
+        </main>
+
+    </body>
+
+</html>

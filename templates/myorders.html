@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+{% block title %}
+    My orders
+{% endblock %}
+{% block main %}
+<table>
+    <tr>
+        <td>
+<div align="left" style="margin-left:5%">
+    <form action="/myorders" method="post">
+    <label for="sort">Sort by:</label>
+    <select name="options" id="sort">
+      <option value="0" {% if default == 0 %} selected {% endif %}>Work order number</option>
+      <option value="1" {% if default == 1 %} selected {% endif %}>Status</option>
+      <option value="2" {% if default == 2 %} selected {% endif %}>Priority</option>
+      <option value="3" {% if default == 3 %} selected {% endif %}>Due date</option>
+      <option value="4" {% if default == 4 %} selected {% endif %}>Equipment ID</option>
+    </select>
+    <button class="btn btn-primary" type="submit">Sort</button>
+    </form>
+</div>
+</td>
+</tr>
+</table>
+    <hr>
+<div>
+    <form action="/myorders" method="post" id="bananaform">
+<table>
+    <thead>
+        <tr>
+            <th style="padding-bottom:5px;padding-top:5px;">Work order number</th>
+            <th style="padding-bottom:5px;padding-top:5px;">Status</th>
+            <th style="padding-bottom:5px;padding-top:5px;">Priority</th>
+            <th style="padding-bottom:5px;padding-top:5px;">Production engineer</th>
+            <th style="padding-bottom:5px;padding-top:5px;white-space: nowrap;">Due date</th>
+            <th style="padding-bottom:5px;padding-top:5px;">Equipment ID</th>
+            <th style="padding-bottom:5px;padding-top:5px;">Description</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        <form action="/myorders" method="post" id="bananaform">
+            <script>
+                function form_submit(idx)
+                {
+                    $('#bananaform').append('<input type="hidden" name="orderopen" value="O'+String(idx)+'" />');
+                    $("#bananaform").submit(); 
+                }
+            </script>
+        {% for a in data %}
+            <tr class="data" onclick="form_submit({{ a[0] + 10 }})">
+                <td style="padding-bottom:5px;padding-top:5px;">O{{ a[0] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;">{{ a[1] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;">{{ a[15] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;">{{ a[11] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;white-space: nowrap;">{{ a[14] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;">{{ a[12] }}</td>
+                <td style="padding-bottom:5px;padding-top:5px;">{{ a[13] }}</td>
+            </tr>
+        {% endfor %}
+        </form>
+        {% if data|length == 0 %}
+        <tr class="data">
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+            <td style="padding-bottom:5px;padding-top:5px;">-</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+</form>
+</div>
+{% endblock %}

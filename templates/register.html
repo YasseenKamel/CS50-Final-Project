@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block main %}
+    {% if error1 %}
+    <p>Passwords do not match.</p>
+    {% endif %}
+    {% if error2 %}
+    <p>User already exists.</p>
+    {% endif %}
+    <form action="/register" method="post">
+        <div class="mb-3">
+            <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="username" name="username" placeholder="Username" type="text" required>
+        </div>
+        <div class="mb-3">
+            <input class="form-control mx-auto w-auto" id="password1" name="password" placeholder="Password" type="password" required>
+        </div>
+        <div class="mb-3">
+            <input class="form-control mx-auto w-auto" id="password2" name="confirmation" placeholder="Confirm password" type="password" required>
+        </div>
+        <div>
+            <p class="mb-5 small text-center text-muted">Register as:</p>
+            <input type="radio" id="manager" name="type" value="managers" required>Production engineer</input>
+            <input type="radio" id="user" name="type" value="users" required>Maintenance engineer</input>
+        </div>
+        <button class="btn btn-primary" type="submit">Register</button>
+    </form>
+{% endblock %}

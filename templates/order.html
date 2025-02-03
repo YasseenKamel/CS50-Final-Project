@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+
+        <meta charset="utf-8">
+        <meta name="viewport" content="initial-scale=1, width=device-width">
+
+        <!-- http://getbootstrap.com/docs/5.1/ -->
+        <link href="/static/bootstrap.min.css" rel="stylesheet">
+        <script src="/static/bootstrap.bundle.min.js"></script>
+        <script src="/static/jquery.js"></script>
+        <script src="/static/jquery.min.js"></script>
+        <link href="/static/styles.css" rel="stylesheet">
+        <script>
+            function lock(){
+                document.getElementById("status").setAttribute("disabled",true);
+                document.getElementById("description").setAttribute("readonly",true);
+                document.getElementById("submitbanana").remove();
+
+                var steptable = document.getElementById("tblstep");
+                var rowCount = steptable.rows.length;
+                var good = 1;
+                for(var i = 1 ;  i <= rowCount ; i ++) {
+                    if(i < rowCount-1){
+                        steptable.rows[i].cells[1].getElementsByTagName("input")[0].setAttribute("readonly",true);
+                        steptable.rows[i].cells[2].getElementsByTagName("input")[0].setAttribute("readonly",true);
+                        steptable.rows[i].cells[3].getElementsByTagName("input")[0].setAttribute("readonly",true);
+                        steptable.rows[i].cells[4].getElementsByTagName("input")[0].setAttribute("readonly",true);
+                        steptable.rows[i].deleteCell(7);
+                    }
+                    else if(i < rowCount){
+                        steptable.deleteRow(i);
+                    }
+                }
+
+                var parttable = document.getElementById("tblpart");
+                rowCount = parttable.rows.length;
+                for(var i = 1 ;  i <= rowCount ; i ++) {
+                    if(i < rowCount-1){
+                        parttable.rows[i].cells[1].getElementsByTagName("input")[0].setAttribute("readonly",true);
+                        parttable.rows[i].cells[2].getElementsByTagName("input")[0].setAttribute("readonly",true);
+                        parttable.rows[i].cells[3].getElementsByTagName("input")[0].setAttribute("readonly",true);
+                        parttable.rows[i].deleteCell(6);
+                    }
+                    else if(i < rowCount){
+                        parttable.deleteRow(i);
+                    }
+                }
+            }
+        </script>
+        <title>Make Work order</title>
+
+    </head>
+
+    <body{% if status == 'Completed' %} onload="lock()"{% endif %}>
+        
+        <nav class="bg-light border navbar navbar-expand-md navbar-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">YOKO Systems</a>
+                <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbar" data-bs-toggle="collapse" type="button">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbar">
+                    {% if session["user_id"] %}
+                        <ul class="navbar-nav me-auto mt-2">
+                            {% if session["type"] == 'users' %}
+                            <li class="nav-item"><a class="nav-link" href="/myorders">My work orders</a></li>
+                            {% endif %}
+                        </ul>
+                        <ul class="navbar-nav ms-auto mt-2">
+                            <li class="nav-item"><p class="nav-link">{{ username_display }}</p></li>
+                            <li class="nav-item"><a class="nav-link" href="/logout">Log out</a></li>
+                        </ul>
+                    {% else %}
+                        <ul class="navbar-nav ms-auto mt-2">
+                            <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
+                            <li class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+
+        {% if get_flashed_messages() %}
+            <header>
+                <div class="alert alert-primary mb-0 text-center" role="alert">
+                    {{ get_flashed_messages() | join(" ") }}
+                </div>
+            </header>
+        {% endif %}
+
+        <main class="container-fluid py-5 text-center">
+            <h3 id="header1">{{ stat }} work order O{{ reqdata[0] }}</h3>
+<hr>
+
+<form action="/" method="post" id="form">
+<div class="reqdata" id="reqdata">
+    <div class="reqdata1">
+        <h5>Request ID: R{{ reqdata[0] }}</h5>
+    </div>
+    <div class="reqdata2">
+        <h5>Priority: {{ reqdata[2] }}</h5>
+    </div>
+    <div class="reqdata3">
+        <h5>Production engineer: {{ reqdata[4] }}</h5>
+    </div>
+    <div class="reqdata4">
+        <h5>Due date: {{ reqdata[5] }}</h5>
+    </div>
+    <div class="reqdata7">
+        <div class="boxo1">
+            <label for="status" style="margin-right:10px"><h5>Work order status:  </h5></label>
+            <select name="status" id="status">
+            <option value="Draft" {% if status == 'Draft' %} selected {% endif %}>Draft</option>
+            <option value="Onhold" {% if status == 'Onhold' %} selected {% endif %}>Onhold</option>
+            <option value="Ongoing" {% if status == 'Ongoing' %} selected {% endif %}>Ongoing</option>
+            {% if status == 'Ongoing' or status == 'Completed' %}<option value="Completed" {% if status == 'Completed' %} selected {% endif %}>Completed</option>{% endif %}
+            </select>
+        </div>
+    </div>
+    <div class="reqdata5">
+        <h5>Equipment ID: {{ reqdata[6] }}</h5>
+    </div>
+    <div class="reqdata6">
+        <h5>Request description: {{ reqdata[7] }}</h5>
+    </div>
+</div>
+<br>
+<div class="mytabs" id="home">
+    <input type="radio" id="tabmain" name="mytabs" checked="checked">
+    <label for="tabmain" class="labe">Order main data</label>
+    <div class="tab">
+        <div class="ord">
+            <div class="boxo2">
+                <div class="inputo" style="height:110px">
+                    <p style="margin-right: 10px"><label for="description">Description:  </label></p>
+                </div>
+                <div>
+                    <textarea id="description" name="description" rows="4" cols="100" required>{{ description }}</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="radio" id="tabsteps" name="mytabs">
+    <label for="tabsteps" class="labe">Order steps</label>
+    <div class="tab">
+        <table id="tblstep">
+            <thead>
+                <tr>
+                    <th style="padding-bottom:5px;padding-top:5px;">Step number</th>
+                    <th style="padding-bottom:5px;padding-top:5px;min-width:400px;">Description</th>
+                    <th style="padding-bottom:5px;padding-top:5px;">Duration(hr)</th>
+                    <th style="padding-bottom:5px;padding-top:5px;">Number of workers</th>
+                    <th style="padding-bottom:5px;padding-top:5px;">Hourly wage per worker($)</th>
+                    <th style="padding-bottom:5px;padding-top:5px;">Total work hours</th>
+                    <th style="padding-bottom:5px;padding-top:5px;">Total wages($)</th>
+                    <th></th>
+                </tr>
+            </thead>
+            
+            <tbody>
+                {% set step_no = 1 %}
+                <script>
+                    var inputs = Array.prototype.slice.call(document.querySelectorAll("input.steps"));
+
+                    function bananasubmit(){
+
+                        if(document.getElementById("status").value == 'Draft'){
+                            document.getElementById("form").submit();
+                            return;
+                        }
+                        var steptable = document.getElementById("tblstep");
+                        var rowCount = steptable.rows.length;
+                        var good = 1;
+                        for(var i = 1 ;  i <= rowCount ; i ++) {
+                            if(i < rowCount-1){
+                                if(steptable.rows[i].cells[1].getElementsByTagName("input")[0].value.length == 0 || steptable.rows[i].cells[2].getElementsByTagName("input")[0].value.length == 0 || steptable.rows[i].cells[3].getElementsByTagName("input")[0].value.length == 0 || steptable.rows[i].cells[4].getElementsByTagName("input")[0].value.length == 0|| steptable.rows[i].cells[1].getElementsByTagName("input")[0].value == 0 || steptable.rows[i].cells[2].getElementsByTagName("input")[0].value == 0 || steptable.rows[i].cells[3].getElementsByTagName("input")[0].value == 0 || steptable.rows[i].cells[4].getElementsByTagName("input")[0].value == 0){
+                                    good = 0;
+                                    break;
+                                }
+                            }
+                        }
+
+                        var parttable = document.getElementById("tblpart");
+                        rowCount = parttable.rows.length;
+                        for(var i = 1 ;  i <= rowCount ; i ++) {
+                            if(i < rowCount-1){
+                                if(parttable.rows[i].cells[1].getElementsByTagName("input")[0].value.length == 0 || parttable.rows[i].cells[2].getElementsByTagName("input")[0].value.length == 0 || parttable.rows[i].cells[3].getElementsByTagName("input")[0].value.length == 0|| parttable.rows[i].cells[1].getElementsByTagName("input")[0].value == 0 || parttable.rows[i].cells[2].getElementsByTagName("input")[0].value == 0 || parttable.rows[i].cells[3].getElementsByTagName("input")[0].value == 0){
+                                    good = 0;
+                                    break;
+                                }
+                            }
+                        }
+                        if(good == 0){
+                            alert("Please fill in all needed fields before submitting non-draft order.");
+                            return;
+                        }
+                        if(document.getElementById("status").value == 'Completed'){
+                            document.getElementById("home").style.display = "none";
+                            document.getElementById("submitbanana").style.display = "none";
+                            document.getElementById("reqdata").style.display = "none";
+                            document.getElementById("outro").style.display = "block";
+                            var text1 = document.getElementById("header1").innerHTML;
+                            document.getElementById("header1").innerHTML = 'Complete' + text1.slice(6);
+                            return;
+                        }
+                        document.getElementById("form").submit();
+                    }
+
+                    function bananasubmit1(){
+                        document.getElementById("form").submit();
+                    }
+                    
+                    function banana00(){
+                        document.getElementById("tac").value = Number(document.getElementById("sac").value) + Number(document.getElementById("wac").value);
+                    }
+
+                    function focusNext(e) {
+                        var num = Number(e.which)
+                        if(num && num == 13){
+                            const currInput = document.activeElement;
+                            const cellInput = currInput.parentElement;
+                            const rowInput = cellInput.parentElement;
+                            const rowidx = rowInput.cells[0].getElementsByTagName("input")[0].value;
+                            const cellcnt = rowInput.cells.length;
+                            var cellidx = 0;
+                            for(var i = 0 ; i < cellcnt ; i ++){
+                                if(cellInput.getElementsByTagName("input")[0].id == rowInput.cells[i].getElementsByTagName("input")[0].id){
+                                    cellidx = i;
+                                    break;
+                                }
+                            }
+                            if(cellidx < 4){
+                                rowInput.cells[cellidx + 1].getElementsByTagName("input")[0].focus();
+                            }
+                            else{
+                                const table = rowInput.parentElement;
+                                table.rows[rowidx].cells[1].getElementsByTagName("input")[0].focus();
+                            }
+                        }
+                    }
+
+                    inputs.forEach((input) => {
+                        input.removeEventListener('keyup', focusNext);
+                        input.addEventListener('keyup', focusNext);
+                    });
+
+                    function banana(event,idx) {
+                        document.getElementById("total"+idx).innerHTML = document.getElementById("workers"+idx).value * document.getElementById("time"+idx).value;
+                        document.getElementById("totalwage"+idx).innerHTML = document.getElementById("workers"+idx).value * document.getElementById("time"+idx).value * document.getElementById("wage"+idx).value;
+                    };
+                    function del(idx) {
+                        document.getElementById("tblstep").deleteRow(idx);
+                        inputs = Array.prototype.slice.call(document.querySelectorAll("input.steps"));
+                        inputs.forEach((input) => {
+                            input.removeEventListener('keyup', focusNext);
+                            input.addEventListener('keyup', focusNext);
+                        });
+                        var table=document.getElementById("tblstep");
+                        var rowCount = table.rows.length;
+                        for(var i = 1 ;  i <= rowCount ; i ++) { 
+                            table.rows[i].cells[0].getElementsByTagName("input")[0].value = i;
+                            table.rows[i].cells[0].getElementsByTagName("input")[0].setAttribute("name",("step"+i));
+                            table.rows[i].cells[0].getElementsByTagName("input")[0].setAttribute("id",("step"+i));
+
+                            table.rows[i].cells[1].getElementsByTagName("input")[0].setAttribute("name",("desc"+i));
+                            table.rows[i].cells[1].getElementsByTagName("input")[0].setAttribute("id",("desc"+i));
+                            
+                            table.rows[i].cells[2].getElementsByTagName("input")[0].setAttribute("name",("time"+i));
+                            table.rows[i].cells[2].getElementsByTagName("input")[0].setAttribute("id",("time"+i));
+                            table.rows[i].cells[2].getElementsByTagName("input")[0].setAttribute("onchange",("banana(event,"+i+")"));
+
+                            table.rows[i].cells[3].getElementsByTagName("input")[0].setAttribute("name",("workers"+i));
+                            table.rows[i].cells[3].getElementsByTagName("input")[0].setAttribute("id",("workers"+i));
+                            table.rows[i].cells[3].getElementsByTagName("input")[0].setAttribute("onchange",("banana(event,"+i+")"));
+
+                            table.rows[i].cells[4].getElementsByTagName("input")[0].setAttribute("name",("wage"+i));
+                            table.rows[i].cells[4].getElementsByTagName("input")[0].setAttribute("id",("wage"+i));
+                            table.rows[i].cells[4].getElementsByTagName("input")[0].setAttribute("onchange",("banana(event,"+i+")"));
+
+                            table.rows[i].cells[5].setAttribute("id",("total"+i));
+                            table.rows[i].cells[6].setAttribute("id",("totalwage"+i));
+                            if(i < rowCount){
+                                table.rows[i].cells[7].getElementsByTagName("button")[0].setAttribute("name",("delete"+i));
+                                table.rows[i].cells[7].getElementsByTagName("button")[0].setAttribute("id",("delete"+i));
+                                table.rows[i].cells[7].getElementsByTagName("button")[0].setAttribute("onclick",("del("+i+")"));
+                            }
+                        }
+                    };
+                    var no = {{ steps|length }}+2;
+                    function addRow(idx){
+                        var row = '<tr class="data"><td style="padding-bottom:5px;padding-top:5px;"><input class="steps" type="number" name="step'+no+'" id="step'+no+'" min="1" max="999" value = "'+no+'" style="text-align:center" readonly></td><td style="padding-bottom:5px;padding-top:5px;"><input class="steps" type="text" name="desc'+no+'" id="desc'+no+'"></td><td style="padding-bottom:5px;padding-top:5px;"><input class="steps" style="text-align:center" onchange="banana(event,'+no+')" type="number" name="time'+no+'" id="time'+no+'" min="1" max="999"></td><td style="padding-bottom:5px;padding-top:5px;"><input class="steps" style="text-align:center" onchange="banana(event,'+no+')" type="number" name="workers'+no+'" id="workers'+no+'" min="1" max="999"></td><td style="padding-bottom:5px;padding-top:5px;"><input class="steps" style="text-align:center" onchange="banana(event,'+no+')" type="number" name="wage'+no+'" id="wage'+no+'" min="1" max="999"></td><td style="padding-bottom:5px;padding-top:5px;" id="total'+no+'"></td><td style="padding-bottom:5px;padding-top:5px;" id="totalwage'+no+'"></td><td></td></tr>';
+                        var table=document.getElementById("tblstep");
+                        //console.log(table.rows.length)
+                        var lastRow = table.rows[table.rows.length-1];
+                        var lastCell = lastRow.cells[lastRow.cells.length-1];
+                        lastCell.innerHTML = '<button type="button" class="btn btn-primary" name="delete'+(no - 1)+'" id="delete'+(no - 1)+'" onclick="del('+(no - 1)+')"><img src="/static/close.png" style="height: 15px; width: 15px"></button>';
+                        $('#tblstep tbody').append(row);
+                        inputs = Array.prototype.slice.call(document.querySelectorAll("input.steps"));
+                        inputs.forEach((input) => {
+                            input.removeEventListener('keyup', focusNext);
+                            input.addEventListener('keyup', focusNext);
+                        });
+                    }
+
+                    $('#tblstep').on('change', 'input', function() {
+                        if($(this).val() != '' && $(this).closest('tr').is(':last-child')) {
+                            no = document.getElementById("tblstep").rows.length;
+                            addRow(no);
+                            no += 1;
+                        }
+                    });
+                </script>
+                {% for a in steps %}
+                
+                    <tr class="data">
+                        <td style="padding-bottom:5px;padding-top:5px;"><input class="steps" type="number" name="step{{ loop.index }}" id="step{{ loop.index }}" min="1" max="999" value = "{{ loop.index }}" style="text-align:center" readonly></td>
+                        <td style="padding-bottom:5px;padding-top:5px;"><input class="steps" type="text" name="desc{{ loop.index }}" id="desc{{ loop.index }}" value="{{ a[6] }}"></td>
+                        <td style="padding-bottom:5px;padding-top:5px;"><input class="steps" style="text-align:center" onchange="banana(event,{{ loop.index }})" type="number" name="time{{ loop.index }}" id="time{{ loop.index }}" min="1" max="999" value = "{{ a[3] }}"></td>
+                        <td style="padding-bottom:5px;padding-top:5px;"><input class="steps" style="text-align:center" onchange="banana(event,{{ loop.index }})" type="number" name="workers{{ loop.index }}" id="workers{{ loop.index }}" min="1" max="999" value = "{{ a[4] }}"></td>
+                        <td style="padding-bottom:5px;padding-top:5px;"><input class="steps" style="text-align:center" onchange="banana(event,{{ loop.index }})" type="number" name="wage{{ loop.index }}" id="wage{{ loop.index }}" min="1" max="999" value = "{{ a[5] }}"></td>
+                        <td style="padding-bottom:5px;padding-top:5px;" id="total{{ loop.index }}">{{ a[3] * a[4] }}</td>
+                        <td style="padding-bottom:5px;padding-top:5px;" id="totalwage{{ loop.index }}">{{ a[5] * a[4] * a[3] }}</td>
+                        <td>
+                            <button class="btn btn-primary" name="delete{{ loop.index }}" id="delete{{ loop.index }}" onclick="del({{ loop.index }})" type="button">
+                                <img src="/static/close.png" style="height: 15px; width: 15px">
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                {% set step_no = steps|length + 1 %}
+                <tr class="data">
+                    <td style="padding-bottom:5px;padding-top:5px;"><input class="steps" type="number" name="step{{ step_no }}" id="step{{ step_no }}" min="1" max="999" value = "{{ step_no }}" style="text-align:center" readonly></td>
+                    <td style="padding-bottom:5px;padding-top:5px;"><input class="steps" type="text" name="desc{{ step_no }}" id="desc{{ step_no }}"></td>
+                    <td style="padding-bottom:5px;padding-top:5px;"><input class="steps" style="text-align:center" onchange="banana(event,{{ step_no }})" type="number" name="time{{ step_no }}" id="time{{ step_no }}" min="1" max="999"></td>
+                    <td style="padding-bottom:5px;padding-top:5px;"><input class="steps" style="text-align:center" onchange="banana(event,{{ step_no }})" type="number" name="workers{{ step_no }}" id="workers{{ step_no }}" min="1" max="999"></td>
+                    <td style="padding-bottom:5px;padding-top:5px;"><input class="steps" style="text-align:center" onchange="banana(event,{{ step_no }})" type="number" name="wage{{ step_no }}" id="wage{{ step_no }}" min="1" max="999"></td>
+                    <td style="padding-bottom:5px;padding-top:5px;" id="total{{ step_no }}"></td>
+                    <td style="padding-bottom:5px;padding-top:5px;" id="totalwage{{ step_no }}"></td>
+                    <td>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <input type="radio" id="tabparts" name="mytabs">
+    <label for="tabparts" class="labe">Spare parts</label>
+    <div class="tab">
+        <table id="tblpart">
+            <thead>
+                <tr>
+                    <th style="padding-bottom:5px;padding-top:5px;">Part number</th>
+                    <th style="padding-bottom:5px;padding-top:5px;">Spare part code</th>
+                    <th style="padding-bottom:5px;padding-top:5px;min-width:400px;">Description</th>
+                    <th style="padding-bottom:5px;padding-top:5px;">Quantity</th>
+                    <th style="padding-bottom:5px;padding-top:5px;">Price($)</th>
+                    <th style="padding-bottom:5px;padding-top:5px;">Total price($)</th>
+                    <th></th>
+                </tr>
+            </thead>
+            
+            <tbody>
+                {% set part_no = 1 %}
+                <script>
+                    var inputs1 = Array.prototype.slice.call(document.querySelectorAll("input.parts"));
+                    
+                    function focusNext1(e) {
+                        var num = Number(e.which)
+                        if(num && num == 13){
+                            const currInput = document.activeElement;
+                            const cellInput = currInput.parentElement;
+                            const rowInput = cellInput.parentElement;
+                            const rowidx = rowInput.cells[0].getElementsByTagName("input")[0].value;
+                            const cellcnt = rowInput.cells.length;
+                            var cellidx = 0;
+                            for(var i = 0 ; i < cellcnt ; i ++){
+                                if(cellInput.getElementsByTagName("input")[0].id == rowInput.cells[i].getElementsByTagName("input")[0].id){
+                                    cellidx = i;
+                                    break;
+                                }
+                            }
+                            if(cellidx < 3){
+                                rowInput.cells[cellidx + 1].getElementsByTagName("input")[0].focus();
+                            }
+                            else{
+                                const table = rowInput.parentElement;
+                                table.rows[rowidx].cells[1].getElementsByTagName("input")[0].focus();
+                            }
+                        }
+                    }
+
+                    inputs1.forEach((input) => {
+                        input.removeEventListener('keyup', focusNext1);
+                        input.addEventListener('keyup', focusNext1);
+                    });
+
+                    
+                    function del1(idx) {
+                        document.getElementById("tblpart").deleteRow(idx);
+                        inputs1 = Array.prototype.slice.call(document.querySelectorAll("input.parts"));
+                        inputs1.forEach((input) => {
+                            input.removeEventListener('keyup', focusNext1);
+                            input.addEventListener('keyup', focusNext1);
+                        });
+                        var table=document.getElementById("tblpart");
+                        var rowCount = table.rows.length;
+                        for(var i = 1 ;  i <= rowCount ; i ++) { 
+                            table.rows[i].cells[0].getElementsByTagName("input")[0].value = i;
+                            table.rows[i].cells[0].getElementsByTagName("input")[0].setAttribute("name",("part"+i));
+                            table.rows[i].cells[0].getElementsByTagName("input")[0].setAttribute("id",("part"+i));
+
+                            table.rows[i].cells[1].getElementsByTagName("input")[0].setAttribute("name",("code"+i));
+                            table.rows[i].cells[1].getElementsByTagName("input")[0].setAttribute("id",("code"+i));
+                            
+                            table.rows[i].cells[2].getElementsByTagName("input")[0].setAttribute("name",("descpart"+i));
+                            table.rows[i].cells[2].getElementsByTagName("input")[0].setAttribute("id",("descpart"+i));
+
+                            table.rows[i].cells[3].getElementsByTagName("input")[0].setAttribute("name",("quantity"+i));
+                            table.rows[i].cells[3].getElementsByTagName("input")[0].setAttribute("id",("quantity"+i));
+                            table.rows[i].cells[3].getElementsByTagName("input")[0].setAttribute("onchange",("banana1(event,"+i+")"));
+
+                            table.rows[i].cells[4].setAttribute("id",("price"+i));
+                            table.rows[i].cells[5].setAttribute("id",("totalprice"+i));
+                            if(i < rowCount){
+                                table.rows[i].cells[6].getElementsByTagName("button")[0].setAttribute("name",("deletepart"+i));
+                                table.rows[i].cells[6].getElementsByTagName("button")[0].setAttribute("id",("deletepart"+i));
+                                table.rows[i].cells[6].getElementsByTagName("button")[0].setAttribute("onclick",("del1("+i+")"));
+                            }
+                        }
+                    };
+
+                    function banana1(event,idx) {
+                        if(document.getElementById("quantity"+idx).value == 0){
+                            del1(idx);
+                        }
+                        document.getElementById("totalprice"+idx).innerHTML = document.getElementById("quantity"+idx).value * Number(document.getElementById("price"+idx).innerHTML);
+                    };
+
+                    var no1 = {{ parts|length }}+2;
+                    function addRow1(idx){
+                        var row = '<tr class="data"><td style="padding-bottom:5px;padding-top:5px;"><input class="parts" type="number" name="part'+no1+'" id="part'+no1+'" min="1" max="999" value = "'+no1+'" style="text-align:center" readonly></td><td style="padding-bottom:5px;padding-top:5px;"><input class="parts" type="text" name="code'+no1+'" id="code'+no1+'" list="codes'+no1+'" onchange="resetIfInvalid(this);"><datalist id="codes'+no1+'">{% for b in allparts %}<option value="{{ b[2] }}">{% endfor %}</datalist></td><td style="padding-bottom:5px;padding-top:5px;"><input class="parts" type="text" name="descpart'+no1+'" id="descpart'+no1+'" list="descs'+no1+'" onchange="resetIfInvalid1(this);"><datalist id="descs'+no1+'">{% for b in allparts %}<option value="{{ b[1] }}">{% endfor %}</datalist></td><td style="padding-bottom:5px;padding-top:5px;"><input class="parts" style="text-align:center" onchange="banana1(event,'+no1+')" type="number" name="quantity'+no1+'" id="quantity'+no1+'" min="0" max="999"></td><td style="padding-bottom:5px;padding-top:5px;" id="price'+no1+'"></td><td style="padding-bottom:5px;padding-top:5px;" id="totalprice'+no1+'"></td><td></td></tr>';
+                        var table=document.getElementById("tblpart");
+                        //console.log(table.rows.length)
+                        var lastRow = table.rows[table.rows.length-1];
+                        var lastCell = lastRow.cells[lastRow.cells.length-1];
+                        lastCell.innerHTML = '<button type="button" class="btn btn-primary" name="deletepart'+(no1 - 1)+'" id="deletepart'+(no1 - 1)+'" onclick="del1('+(no1 - 1)+')"><img src="/static/close.png" style="height: 15px; width: 15px"></button>';
+                        $('#tblpart tbody').append(row);
+                        inputs1 = Array.prototype.slice.call(document.querySelectorAll("input.parts"));
+                        inputs1.forEach((input) => {
+                            input.removeEventListener('keyup', focusNext1);
+                            input.addEventListener('keyup', focusNext1);
+                        });
+                    }
+
+                    $('#tblpart').on('change', 'input', function() {
+                        if($(this).val() != '' && $(this).closest('tr').is(':last-child')) {
+                            no1 = document.getElementById("tblpart").rows.length;
+                            addRow1(no1);
+                            no1 += 1;
+                        }
+                    });
+
+                    var codes = new Array({% for a in allparts %}"{{ a[2] }}"{% if loop.index < allparts|length %},{% endif %}{% endfor %});
+                    var descs = new Array({% for a in allparts %}"{{ a[1] }}"{% if loop.index < allparts|length %},{% endif %}{% endfor %});
+                    var prices = new Array({% for a in allparts %}"{{ a[3] }}"{% if loop.index < allparts|length %},{% endif %}{% endfor %});
+
+                    function resetIfInvalid(el){
+                        var currInput = document.activeElement;
+                        var cellInput = currInput.parentElement;
+                        var rowInput = cellInput.parentElement;
+                        var rowidx = rowInput.cells[0].getElementsByTagName("input")[0].value;
+                        if (el.value == ""){
+                            rowInput.cells[2].getElementsByTagName("input")[0].value = '';
+                            return;
+                        }
+                        for (var i = 0; i< codes.length; i++) {
+                            if (el.value == codes[i]){
+                                //edit desc and price
+                                rowInput.cells[2].getElementsByTagName("input")[0].value = descs[i];
+                                rowInput.cells[4].innerHTML = prices[i];
+                                if(rowInput.cells[3].getElementsByTagName("input")[0].value){
+                                    rowInput.cells[5].innerHTML = Number(prices[i]) * rowInput.cells[3].getElementsByTagName("input")[0].value;
+                                }
+                                return;
+                            }
+                        }
+                        rowInput.cells[2].getElementsByTagName("input")[0].value = '';
+                        el.value = "";
+                    }
+
+                    function resetIfInvalid1(el){
+                        var currInput = document.activeElement;
+                        var cellInput = currInput.parentElement;
+                        var rowInput = cellInput.parentElement;
+                        var rowidx = rowInput.cells[0].getElementsByTagName("input")[0].value;
+                        if (el.value == ""){
+                            rowInput.cells[1].getElementsByTagName("input")[0].value = '';
+                            return;
+                        }
+                        for (var i = 0; i< descs.length; i++) {
+                            if (el.value == descs[i]){
+                                //edit code and price
+                                rowInput.cells[1].getElementsByTagName("input")[0].value = codes[i];
+                                rowInput.cells[4].innerHTML = prices[i];
+                                if(rowInput.cells[3].getElementsByTagName("input")[0].value){
+                                    rowInput.cells[5].innerHTML = Number(prices[i]) * rowInput.cells[3].getElementsByTagName("input")[0].value;
+                                }
+                                return;
+                            }
+                        }
+                        rowInput.cells[1].getElementsByTagName("input")[0].value = '';
+                        el.value = "";
+                    }
+
+                </script>
+                {% for a in parts %}
+                    <tr class="data">
+                        <td style="padding-bottom:5px;padding-top:5px;"><input class="parts" type="number" name="part{{ loop.index }}" id="part{{ loop.index }}" min="1" max="999" value = "{{ loop.index }}" style="text-align:center" readonly></td>
+                        <td style="padding-bottom:5px;padding-top:5px;">
+                            <input class="parts" type="text" name="code{{ loop.index }}" id="code{{ loop.index }}" value="{{ a[0] }}" list="codes{{ loop.index }}" onchange="resetIfInvalid(this);">
+                            <datalist id="codes{{ loop.index }}">
+                                {% for b in allparts %}
+                                <option value="{{ b[2] }}">
+                                {% endfor %}
+                            </datalist>
+                        </td>
+                        <td style="padding-bottom:5px;padding-top:5px;">
+                            <input class="parts" type="text" name="descpart{{ loop.index }}" id="descpart{{ loop.index }}" value="{{ a[1] }}" list="descs{{ loop.index }}" onchange="resetIfInvalid1(this);">
+                            <datalist id="descs{{ loop.index }}">
+                                {% for b in allparts %}
+                                <option value="{{ b[1] }}">
+                                {% endfor %}
+                            </datalist>
+                        </td>
+                        <td style="padding-bottom:5px;padding-top:5px;"><input class="parts" style="text-align:center" onchange="banana1(event,{{ loop.index }})" type="number" name="quantity{{ loop.index }}" id="quantity{{ loop.index }}" min="0" max="999" value="{{ a[2] }}"></td>
+                        <td style="padding-bottom:5px;padding-top:5px;" id="price{{ loop.index }}">{{ a[3] }}</td>
+                        <td style="padding-bottom:5px;padding-top:5px;" id="totalprice{{ loop.index }}">{{ a[2] * a[3] }}</td>
+                        <td>
+                            <button class="btn btn-primary" name="deletepart{{ loop.index }}" id="deletepart{{ loop.index }}" onclick="del1({{ loop.index }})" type="button">
+                                <img src="/static/close.png" style="height: 15px; width: 15px">
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                {% set part_no = parts|length + 1 %}
+                <tr class="data">
+                    <td style="padding-bottom:5px;padding-top:5px;"><input class="parts" type="number" name="part{{ part_no }}" id="part{{ part_no }}" min="1" max="999" value = "{{ part_no }}" style="text-align:center" readonly></td>
+                    <td style="padding-bottom:5px;padding-top:5px;">
+                        <input class="parts" type="text" name="code{{ part_no }}" id="code{{ part_no }}" list="codes{{ part_no }}" onchange="resetIfInvalid(this);">
+                        <datalist id="codes{{ part_no }}">
+                            {% for b in allparts %}
+                            <option value="{{ b[2] }}">
+                            {% endfor %}
+                        </datalist>
+                    </td>
+                    <td style="padding-bottom:5px;padding-top:5px;">
+                        <input class="parts" type="text" name="descpart{{ part_no }}" id="descpart{{ part_no }}" list="descs{{ part_no }}" onchange="resetIfInvalid1(this);">
+                        <datalist id="descs{{ part_no }}">
+                            {% for b in allparts %}
+                            <option value="{{ b[1] }}">
+                            {% endfor %}
+                        </datalist>
+                    </td>
+                    <td style="padding-bottom:5px;padding-top:5px;"><input class="parts" style="text-align:center" onchange="banana1(event,{{ part_no }})" type="number" name="quantity{{ part_no }}" id="quantity{{ part_no }}" min="0" max="999"></td>
+                    <td style="padding-bottom:5px;padding-top:5px;" id="price{{ part_no }}"></td>
+                    <td style="padding-bottom:5px;padding-top:5px;" id="totalprice{{ part_no }}"></td>
+                    <td>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% if status == 'Completed' %}
+    <input type="radio" id="tabactual" name="mytabs">
+    <label for="tabactual" class="labe">Actual data</label>
+    <div class="tab">
+        <div class="complete">
+            <div class="complete1">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="spc1">Spare parts planned cost($):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="spc1" name="spc1" type="number" readonly value="{{ orderdata[0][3] }}">
+                </div>
+            </div>
+            <div class="complete2">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="sac1">Spare parts actual cost($):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="sac1" name="sac1" type="number" readonly value="{{ orderdata[0][8] }}">
+                </div>
+            </div>
+            <div class="complete3">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="wpc1">Wage planned cost($):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="wpc1" name="wpc1" type="number" readonly value="{{ orderdata[0][4] }}">
+                </div>
+            </div>
+            <div class="complete4">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="wac1">Wage actual cost($):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="wac1" name="wac1" type="number" readonly value="{{ orderdata[0][9] }}">
+                </div>
+            </div>
+            <div class="complete5">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="tpt1">Total planned time(hr):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="tpt1" name="tpt1" type="number" readonly value="{{ orderdata[0][5] }}">
+                </div>
+            </div>
+            <div class="complete6">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="tat1">Total actual time(hr):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="tat1" name="tat1" type="number" readonly value="{{ orderdata[0][6] }}">
+                </div>
+            </div>
+            <div class="complete7">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="tpc1">Total planned cost($):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="tp1c" name="tpc1" type="number" readonly value="{{ orderdata[0][2] }}">
+                </div>
+            </div>
+            <div class="complete8">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="tac1">Total actual cost($):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="tac1" name="tac1" type="number" readonly  value="{{ orderdata[0][7] }}">
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+<button class="btn btn-primary" type="button" onclick="bananasubmit()" id="submitbanana">Submit work order</button>
+<input  value="{{ reqdata[0] }}" name="ordersubmit" style="display:none">
+{% if status == 'Ongoing' %}
+    <div style="display:none" id="outro">
+        <div class="complete">
+            <div class="complete1">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="spc">Spare parts planned cost($):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="spc" name="spc" type="number" readonly value="{{ orderdata[0][3] }}">
+                </div>
+            </div>
+            <div class="complete2">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="sac">Spare parts actual cost($):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="sac" name="sac" type="number" onchange="banana00()" required>
+                </div>
+            </div>
+            <div class="complete3">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="wpc">Wage planned cost($):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="wpc" name="wpc" type="number" readonly value="{{ orderdata[0][4] }}">
+                </div>
+            </div>
+            <div class="complete4">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="wac">Wage actual cost($):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="wac" name="wac" type="number" onchange="banana00()" required>
+                </div>
+            </div>
+            <div class="complete5">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="tpt">Total planned time(hr):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="tpt" name="tpt" type="number" readonly value="{{ orderdata[0][5] }}">
+                </div>
+            </div>
+            <div class="complete6">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="tat">Total actual time(hr):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="tat" name="tat" type="number" required>
+                </div>
+            </div>
+            <div class="complete7">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="tpc">Total planned cost($):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="tpc" name="tpc" type="number" readonly value="{{ orderdata[0][2] }}">
+                </div>
+            </div>
+            <div class="complete8">
+                <div class="input">
+                    <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="tac">Total actual cost($):  </label></p>
+                </div>
+                <div>
+                    <input autocomplete="off" class="form-control mx-auto w-auto" id="tac" name="tac" type="number" readonly value="">
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-primary" type="button" onclick="bananasubmit1()" id="submitbanana1">Submit completion</button>
+    </div>
+{% endif %}
+</form>
+        </main>
+
+    </body>
+
+</html>

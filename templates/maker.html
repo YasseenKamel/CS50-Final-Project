@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+{% block title %}
+    Make Request
+{% endblock %}
+{% block main %}
+<h3>Create work request</h3>
+<form action="/maker" method="post">
+<div class="req">
+    <div class="boxr1">
+        <div class="input" style="height:110px">
+        <p style="margin-right: 10px"><label for="description">Description:  </label></p>
+        </div>
+        <div>
+        <textarea id="description" name="description" rows="4" cols="100" required placeholder="Description"></textarea>
+        </div>
+    </div>
+    <div class="boxr2">
+        <div class="input">
+        <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="due">Due date:  </label></p>
+        </div>
+        <div>
+        <input autocomplete="off" class="form-control mx-auto w-auto" id="due" name="due" placeholder="Due date" type="date" required>
+        </div>
+    </div>
+    <div class="boxr3">
+        <div class="input">
+        <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="priority">Priority:  </label></p>
+        </div>
+        <div>
+        <input autocomplete="off" class="form-control mx-auto w-auto" id="priority" name="priority" placeholder="Priority" onchange="banana1(event)" type="number" min="1" max="5" required>
+        </div>
+    </div>
+    <script>
+        function banana(event) {
+            //console.log(event.target.value)
+            const users2 = JSON.parse({{ users1 | tojson }});
+            const equipment2 = JSON.parse({{ equipment1 | tojson }});
+        for(i = 0 ; i < equipment2.length ; i ++){
+            //console.log(users2[i])
+            if (event.target.value === equipment2[i]) {
+                document.getElementById("user").value = users2[i];
+            }
+        }
+        
+
+        };
+        function banana1(event){
+            if(event.target.value > 5){
+                event.target.value = 5;
+            }
+            if(event.target.value < 1){
+                event.target.value = 1;
+            }
+        }
+    </script>
+    <div class="boxr4">
+        <div class="input">
+        <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="equipment">Equipment code:  </label></p>
+        </div>
+        <div>
+        <input autocomplete="on" class="form-control mx-auto w-auto" list="list" id="equipment" name="equipment" placeholder="Equipment code" type="text" onchange="banana(event)" required>
+        <datalist id="list">
+            {% for a in equipment %}
+            <option data-value="{{ a[0] }}">{{ a[1] }}</option>
+            {% endfor %}
+        </datalist>
+        </div>
+    </div>
+    <div class="boxr5">
+        <div class="input">
+        <p style="margin-top: 8px;margin-bottom: 8px; margin-right: 10px"><label for="equipment">Assigned to:  </label></p>
+        </div>
+        <div>
+        <input autocomplete="off" class="form-control mx-auto w-auto" list="list1" id="user" name="user" type="text" placeholder="Maintenence Engineer" required>
+        <datalist id="list1">
+            {% for a in users2 %}
+            <option data-value="{{ a }}">{{ a }}</option>
+            {% endfor %}
+        </datalist>
+        </div>
+    </div>
+    <div class="boxr6">
+        <button class="btn btn-primary" type="submit">Request</button>
+    </div>
+</div>
+</form>
+{% endblock %}
